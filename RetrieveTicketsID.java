@@ -53,8 +53,7 @@ public class RetrieveTicketsID {
    
    public static Date parseStringToDate(String string) throws ParseException {	   
 	   String format = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
-	   Date date = new SimpleDateFormat(format).parse(string); 
-	   return date;
+	   return new SimpleDateFormat(format).parse(string);
    }
    
    public static void getItemsAndWriteCSV(String projName, String type, String resolution) throws IOException, JSONException, ParseException {
@@ -146,9 +145,6 @@ public class RetrieveTicketsID {
 
 	         }
 	         
-	         //System.out.println("dataArrayFinal");
-	         //System.out.println(dataArrayFinal);
-	         
 	         // Cycle on 'dataArrayFinal' to write 'valueCounter' associated
 	         // to month and year to the csv file
 	         int indexYear = 0;
@@ -161,7 +157,7 @@ public class RetrieveTicketsID {
 			         indexYear ++;
 	        	 }
 	        	 int year = startYear + indexYear;
-	        	 String dateForDataSet = String.valueOf(indexMonth) + "/" + String.valueOf(year);
+	        	 String dateForDataSet = indexMonth + "/" + year;
 		         
 		         // Write data in csv file produced in output
 	        	 StringBuilder sb2 = new StringBuilder();
@@ -173,21 +169,10 @@ public class RetrieveTicketsID {
 		         
 		         indexMonth ++;
 	         }
-	         
-	         /*System.out.println("dataArray");
-	         for(Date elemDataArray : dataArray)  {
-	        	 System.out.println(elemDataArray);
-	         }*/
-
-	         //System.out.println("sumElemDataArrayFinal");
-	         //System.out.println(sumElemDataArrayFinal);
-	         //System.out.println("dataArray.size()");
-	         //System.out.println(dataArray.size());
 	       
 	         br.close();
 	         
 	      } while (i < total);
-	      //return;
    } 
 
    public static void main(String[] args) throws IOException, JSONException, ParseException {
