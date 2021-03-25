@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,26 +31,24 @@ public class RetrieveTicketsID {
 
    public static JSONArray readJsonArrayFromUrl(String url) throws IOException, JSONException {
       InputStream is = new URL(url).openStream();
-      try {
-         BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-         String jsonText = readAll(rd);
-         JSONArray json = new JSONArray(jsonText);
-         return json;
-       } finally {
-         is.close();
-       }
+      try (
+          BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+    	) {
+    	String jsonText = readAll(rd);
+    	is.close();
+        return new JSONArray(jsonText);
+     }
    }
 
    public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
       InputStream is = new URL(url).openStream();
-      try {
-         BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-         String jsonText = readAll(rd);
-         JSONObject json = new JSONObject(jsonText);
-         return json;
-       } finally {
-         is.close();
-       }
+      try (
+          BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        ) {
+    	String jsonText = readAll(rd);
+    	is.close();
+    	return new JSONObject(jsonText);
+      }
    }
    
    public static Date parseStringToDate(String string) throws ParseException {	   
@@ -60,7 +58,12 @@ public class RetrieveTicketsID {
    }
    
    public static void getItemsAndWriteCSV(String projName, String type, String resolution) throws IOException, JSONException, ParseException {
-	   Integer j = 0, i = 0, k = 0, l = 0, total = 1, sumElemDataArrayFinal = 0;
+	   Integer j = 0;
+	   Integer i = 0;
+	   Integer k = 0;
+	   Integer l = 0;
+	   Integer total = 1;
+	   Integer sumElemDataArrayFinal = 0;
        BufferedWriter br = new BufferedWriter(new FileWriter("/Users/danielemariano/Desktop/result_file.csv"));	 
        
        do {
@@ -76,7 +79,7 @@ public class RetrieveTicketsID {
 	         // Get data from Jira restAPI search
 	         JSONObject json = readJsonFromUrl(url);
 	         JSONArray issues = json.getJSONArray("issues");
-	         ArrayList<Date> dataArray = new ArrayList<Date>();
+	         ArrayList<Date> dataArray = new ArrayList<>();
 	        
 	         // Iterate through each 'type' search for 
 	         total = json.getInt("total");
@@ -93,7 +96,7 @@ public class RetrieveTicketsID {
 	         int dataArraySize = dataArray.size();	         
 	         
 	         // Get some useful information about the time frame
-	         ArrayList<Integer> dataArrayFinal = new ArrayList<Integer>();
+	         ArrayList<Integer> dataArrayFinal = new ArrayList<>();
 	         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Rome"));
 	         cal.setTime(dataArray.get(0));
 	         int startYear = cal.get(Calendar.YEAR);
@@ -117,7 +120,7 @@ public class RetrieveTicketsID {
 	         // Cycle on 'dataArray' counting for each month how many 
 	         // 'types' have been 'resolution'
 	         for(; l < dataArraySize; l++) {
-	        	 int value_counter = 1;
+	        	 int valueCounter = 1;
 	        	 cal.setTime(dataArray.get(l));
 	        	 int year = cal.get(Calendar.YEAR);
 	             int month = cal.get(Calendar.MONTH);
@@ -128,7 +131,7 @@ public class RetrieveTicketsID {
 	                 int month2 = cal.get(Calendar.MONTH);
 	            	 
 	                 if(month == month2 && year == year2) {
-	            		 value_counter = value_counter + 1;
+	            		 valueCounter = valueCounter + 1;
 	            		 l = l + 1;
 	            	 }
 	                 
@@ -137,17 +140,16 @@ public class RetrieveTicketsID {
 	            	 }
 	             }
 	             
-	             // Update the respective 'value_counter' found in 'dataArrayFinal'
+	             // Update the respective 'valueCounter' found in 'dataArrayFinal'
 	             int index = ((year - startYear) * 12) + month;
-	             dataArrayFinal.set(index, value_counter);
+	             dataArrayFinal.set(index, valueCounter);
 
 	         }
 	         
-	         // TODO --> stampe da eliminare
-	         System.out.println("dataArrayFinal");
-	         System.out.println(dataArrayFinal);
+	         //System.out.println("dataArrayFinal");
+	         //System.out.println(dataArrayFinal);
 	         
-	         // Cycle on 'dataArrayFinal' to write 'value_counter' associated
+	         // Cycle on 'dataArrayFinal' to write 'valueCounter' associated
 	         // to month and year to the csv file
 	         int indexYear = 0;
 	         int indexMonth = 1;
@@ -158,7 +160,8 @@ public class RetrieveTicketsID {
 	        		 indexMonth = 1;
 			         indexYear ++;
 	        	 }
-	        	 String dateForDataSet = String.valueOf(indexMonth) + "/" + String.valueOf(startYear + indexYear);
+	        	 int year = startYear + indexYear;
+	        	 String dateForDataSet = String.valueOf(indexMonth) + "/" + String.valueOf(year);
 		         
 		         // Write data in csv file produced in output
 	        	 StringBuilder sb2 = new StringBuilder();
@@ -171,22 +174,20 @@ public class RetrieveTicketsID {
 		         indexMonth ++;
 	         }
 	         
-	         // TODO --> ciclo da eliminare
-	         System.out.println("dataArray");
+	         /*System.out.println("dataArray");
 	         for(Date elemDataArray : dataArray)  {
 	        	 System.out.println(elemDataArray);
-	         } 
+	         }*/
 
-	         // TODO --> stampe da eliminare
-	         System.out.println("sumElemDataArrayFinal");
-	         System.out.println(sumElemDataArrayFinal);
-	         System.out.println("dataArray.size()");
-	         System.out.println(dataArray.size());
+	         //System.out.println("sumElemDataArrayFinal");
+	         //System.out.println(sumElemDataArrayFinal);
+	         //System.out.println("dataArray.size()");
+	         //System.out.println(dataArray.size());
 	       
 	         br.close();
 	         
 	      } while (i < total);
-	      return;
+	      //return;
    } 
 
    public static void main(String[] args) throws IOException, JSONException, ParseException {
