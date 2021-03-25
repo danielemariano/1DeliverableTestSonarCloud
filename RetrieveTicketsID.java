@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -58,7 +59,7 @@ public class RetrieveTicketsID {
 	   return new SimpleDateFormat(format).parse(string);
    }
    
-   public static void writeDataInCSV(ArrayList<Date> dataArray, String type, String resolution) throws IOException {
+   public static void writeDataInCSV(List<Date> dataArray, String type, String resolution) throws IOException {
 
 	   Integer k = 0;
 	   Integer l = 0;
@@ -150,11 +151,12 @@ public class RetrieveTicketsID {
 	  }
    }
    
-   public static ArrayList<Date> getDataFromURL(String projName, String type, String resolution) throws IOException, JSONException, ParseException {
+   public static List<Date> getDataFromURL(String projName, String type, String resolution) throws IOException, JSONException, ParseException {
 	   Integer j = 0;
 	   Integer i = 0;
 	   Integer total = 1;
-	   
+       ArrayList<Date> dataArray = new ArrayList<>();
+       
 	   do {
          // Only gets a max of 1000 at a time, so must do this multiple times if bugs >1000
          j = i + 1000;
@@ -168,7 +170,6 @@ public class RetrieveTicketsID {
          // Get data from Jira restAPI search
          JSONObject json = readJsonFromUrl(url);
          JSONArray issues = json.getJSONArray("issues");
-         ArrayList<Date> dataArray = new ArrayList<>();
         
          // Iterate through each 'type' search for 
          total = json.getInt("total");
@@ -178,13 +179,13 @@ public class RetrieveTicketsID {
          	
          	// Use my 'parseStringToDate' for a better date parsing
          	dataArray.add(parseStringToDate(dataFieldObject));
-         }         
-         
-         // Reorder the array temporally
-         dataArray.sort(null);
-         return dataArray;
+         }
          
       } while (i < total);
+      
+	  // Reorder the array temporally
+      dataArray.sort(null);
+      return dataArray;
    } 
 
    public static void main(String[] args) throws IOException, JSONException, ParseException {
@@ -194,7 +195,7 @@ public class RetrieveTicketsID {
 	   String type = "Bug";
 	   String resolution = "fixed"; 
 	   
-	   ArrayList<Date> dataArray = getDataFromURL(projName, type, resolution);
+	   ArrayList<Date> dataArray = (ArrayList<Date>) getDataFromURL(projName, type, resolution);
 	   writeDataInCSV(dataArray, type, resolution);
    
    }
